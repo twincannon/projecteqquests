@@ -281,10 +281,47 @@ vet_aa = {
     [600]  = {441504000, true, true}, -- Blessing of the Devoted 14 yr
 }
 
+function train_skills(e)
+  local skills = {0,1,2,3,4,5,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,28,29,30,31,32,33,34,36,37,38,39,41,42,43,44,45,46,47,49,51,52,54,67,70,71,72,73,74,76};
+  --{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 48, 49, 50, 51, 52, 53, 54, 56, 62, 67, 70, 71, 72, 73, 74, 76, 77 };
+
+  --for k,v in ipairs(free_skills) do
+  --  if ( e.self:MaxSkill(v) > 0 and e.self:GetRawSkill(v) < 1 and e.self:CanHaveSkill(v) ) then 
+  --    e.self:SetSkill(v, 1);
+  --  end
+  --end
+
+  for i, curskill in ipairs(skills) do
+    local maxskill = e.self:MaxSkill(curskill);
+
+    if (e.self:CanHaveSkill(curskill) == false) then
+      -- Do nothing
+    elseif (maxskill <= e.self:GetRawSkill(curskill)) then
+      -- Do nothing
+    else
+      -- Do Training
+      e.self:SetSkill(curskill, maxskill);
+    end
+  end
+end
+
+function scribe_spells(e)
+  e.self:ScribeSpells(1, e.self:GetLevel())
+  e.self:Message(15, "You reflect upon what you have learned...")
+end
 
 function event_connect(e)
-	grant_veteran_aa(e)
-	don.fix_invalid_faction_state(e.self)
+  local free_skills =  {0,1,2,3,4,5,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,28,29,30,31,32,33,34,36,37,38,39,41,42,43,44,45,46,47,49,51,52,54,67,70,71,72,73,74,76};
+
+  for k,v in ipairs(free_skills) do
+    if ( e.self:MaxSkill(v) > 0 and e.self:GetRawSkill(v) < 1 and e.self:CanHaveSkill(v) ) then
+      e.self:SetSkill(v, 1);
+    end
+  end
+  
+  --grant_veteran_aa(e)
+  don.fix_invalid_faction_state(e.self)
+  scribe_spells(e)
 end
 
 function grant_veteran_aa(e)
@@ -390,13 +427,15 @@ function event_level_up(e)
     end
   end
 
-  if e.self:GetLevel() == 5 then
-    eq.popup("", "<c \"#F0F000\">Welcome to level 5.</c><br><br>You have just been granted a new ability called '<c \"#F0F000\">Origin</c>' which allows you to teleport back to your starting city.<br><br>Open the Alternate Advancement window by pressing the '<c \"#F0F000\">V</c>' key, look in the '<c \"#F0F000\">General' tab</c>, and find the '<c \"#F0F000\">Origin</c>' ability and select it.<br><br>Now press the '<c \"#F0F000\">Hotkey</c>' button to create a hotkey you can place on your hot bar.");
-  end
+  scribe_spells(e)
 
-  if e.self:GetLevel() == 10 and eq.is_dragons_of_norrath_enabled() then
-    eq.popup("", "<c \"#F0F000\">Welcome to level 10.</c><br><br>You are now able to begin the new player armor and weapon quests.  Speak with Castlen and Barrenzin or V`Lynn Renloe in the <c \"#66CCFF\">Plane of Knowledge</c> to begin.  One additional quest will become available to you at each level past level 10, so be sure to check back with these NPCs as you continue to gain experience.");
-  end
+  --if e.self:GetLevel() == 5 then
+  --  eq.popup("", "<c \"#F0F000\">Welcome to level 5.</c><br><br>You have just been granted a new ability called '<c \"#F0F000\">Origin</c>' which allows you to teleport back to your starting city.<br><br>Open the Alternate Advancement window by pressing the '<c \"#F0F000\">V</c>' key, look in the '<c \"#F0F000\">General' tab</c>, and find the '<c \"#F0F000\">Origin</c>' ability and select it.<br><br>Now press the '<c \"#F0F000\">Hotkey</c>' button to create a hotkey you can place on your hot bar.");
+  --end
+
+  --if e.self:GetLevel() == 10 and eq.is_dragons_of_norrath_enabled() then
+  --  eq.popup("", "<c \"#F0F000\">Welcome to level 10.</c><br><br>You are now able to begin the new player armor and weapon quests.  Speak with Castlen and Barrenzin or V`Lynn Renloe in the <c \"#66CCFF\">Plane of Knowledge</c> to begin.  One additional quest will become available to you at each level past level 10, so be sure to check back with these NPCs as you continue to gain experience.");
+  --end
 end
 
 test_items = {
