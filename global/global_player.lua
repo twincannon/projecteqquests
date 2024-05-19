@@ -106,7 +106,7 @@ function event_combine(e)
 	
 	-- List of variable recipes and their outcomes (item that is summoned to the player)
 	local recipes = {
-		{"meat",147497,"outcome=13441"} --any meat and string = wolf steak (test)
+		{"meat",147508,"outcome=147506"} --any meat and wooden stick = cooked mystery meat
 	}
 
 	for recipe_idx=1,#recipes do
