@@ -93,6 +93,74 @@ function event_combine_validate(e)
 	return 0;
 end
 
+---@param e PlayerEventCombine
+function event_combine(e)
+	--- Lua_Client->Lua_Inventory->Lua_ItemInst->Lua_Item
+	local inv = e.self:GetInventory()
+	local iteminst = inv:GetItem(e.container_slot)
+	local container = iteminst:GetItem()
+
+	if (container:ID() ~= 147495) then -- Our custom toolbox that supports fuzzy item combines
+		return 0
+	end
+	
+	-- List of variable recipes and their outcomes (item that is summoned to the player)
+	local recipes = {
+		{"meat",147497,"outcome=13441"} --any meat and string = wolf steak (test)
+	}
+
+	for recipe_idx=1,#recipes do
+		local cur_recipe = recipes[recipe_idx]
+		local item_ids_to_remove = {}
+		local recipe_failed = false
+		for bagslot_idx=0,container:BagSlots()-1 do
+			local inviteminst = inv:GetItem(e.container_slot, bagslot_idx)
+			local invitem = inviteminst:GetItem()
+			if (inviteminst.valid) then
+				local found_item = false
+
+				for i=1,#cur_recipe-1 do
+					local is_string = (string.find(string.lower(invitem:Name()), string.lower(cur_recipe[i])) ~= nil)
+					local is_number = type(tonumber(cur_recipe[i])) == "number"
+
+					if is_string or (is_number and tonumber(cur_recipe[i]) == invitem:ID()) then
+						table.insert(item_ids_to_remove, invitem:ID())
+						table.remove(cur_recipe, i) -- apparently really slow method
+						found_item = true
+						break
+					end
+				end
+
+				if not found_item then
+					recipe_failed = true
+					break -- Break out of our bag loop and continue to the next recipe
+				end
+			end
+		end
+
+		if #cur_recipe == 1 and not recipe_failed then -- We only have our outcome left in cur_recipe, so let's make the item
+			-- Summon the outcome item, clear out the existing inventory slots, then print a message
+			local outcome_item_id = cur_recipe[1]:gsub("%outcome=", "")
+			if (type(tonumber(outcome_item_id)) == "number") then
+				e.self:SummonItem(tonumber(outcome_item_id));
+				-- TODO: Get item on cursor to verify it got summoned (i.e. don't eat items if it's a lore duplicate)
+				
+				-- Remove items from the players inventory
+				for item_remove_idx=1,#item_ids_to_remove do
+					e.self:RemoveItem(item_ids_to_remove[item_remove_idx], 1)
+					-- TODO: This should remove the specific stack in the container, not the first item found!
+				end
+
+				e.self:Message(MT.Emote,"You manage to fashion the items together.");
+				return 1
+			end
+		end
+	end
+
+	return 0
+end
+
+
 function event_combine_success(e)
 	if (e.recipe_id == 10904 or e.recipe_id == 10905 or e.recipe_id == 10906 or e.recipe_id == 10907) then
 		e.self:Message(MT.Default,
