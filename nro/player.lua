@@ -8,5 +8,7 @@ function event_click_door(e)
     if dz.valid and expeditions[dz:GetZoneName()] then
       e.self:MovePCDynamicZone(dz:GetZoneID())
     end
+  elseif (door_id == 11) then
+    e.self:MovePC(333, 442, 1525, 0, 391); -- Zone: draniksewersc
   end
 end

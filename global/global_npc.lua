@@ -8,23 +8,25 @@ function event_spawn(e)
     }
 
     if not e.self:IsRareSpawn() then
-        if (math.random(1,100) <= 10) then
-            local name = e.self:GetName()
-            local affix = affixes[math.random(#affixes)]
+        local name = e.self:GetName()
+        if name:find("^a_") or name:find("^an_") then
+            if (math.random(1,100) <= 10) then
+                local affix = affixes[math.random(#affixes)]
 
-            if name:find("^a_") then
-                e.self:TempName(affix .. name:sub(3))
-            elseif name:find("^an_") then
-                e.self:TempName(affix .. name:sub(4))
-            end
-            
-            if affix == "a fierce " then -- Increase max_hit by 33%
-                e.self:ModifyNPCStat("max_hit", tostring(math.ceil(e.self:GetNPCStat("max_hit") * 1.33))) -- Make sure second param is rounded or else it zeroes it out if it's a float
-            elseif affix == "an armored " then -- Double AC
-                e.self:ModifyNPCStat("ac", tostring(math.ceil(e.self:GetNPCStat("ac") * 2)))
-            elseif affix == "an unyielding " then -- Increase health by 25%
-                e.self:ModifyNPCStat("max_hp", tostring(math.ceil(e.self:GetNPCStat("max_hp") * 1.25)))
-                e.self:Heal()
+                if name:find("^a_") then
+                    e.self:TempName(affix .. name:sub(3))
+                elseif name:find("^an_") then
+                    e.self:TempName(affix .. name:sub(4))
+                end
+                
+                if affix == "a fierce " then -- Increase max_hit by 33%
+                    e.self:ModifyNPCStat("max_hit", tostring(math.ceil(e.self:GetNPCStat("max_hit") * 1.33))) -- Make sure second param is rounded or else it zeroes it out if it's a float
+                elseif affix == "an armored " then -- Double AC
+                    e.self:ModifyNPCStat("ac", tostring(math.ceil(e.self:GetNPCStat("ac") * 2)))
+                elseif affix == "an unyielding " then -- Increase health by 25%
+                    e.self:ModifyNPCStat("max_hp", tostring(math.ceil(e.self:GetNPCStat("max_hp") * 1.25)))
+                    e.self:Heal()
+                end
             end
         end
     end
