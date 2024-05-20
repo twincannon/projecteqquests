@@ -133,7 +133,7 @@ function event_combine(e)
 
 				if not found_item then
 					recipe_failed = true
-					break -- Break out of our bag loop and continue to the next recipe
+					break -- Break out of our bag loop TODO does this still work with multiple recipes?
 				end
 			end
 		end

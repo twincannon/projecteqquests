@@ -1,4 +1,39 @@
+---@param e NPCEventSpawn
 function event_spawn(e)
+
+    local affixes = {
+        "a fierce ",
+        "an armored ",
+        "an unyielding "
+    }
+
+    if not e.self:IsRareSpawn() then
+        if (math.random(1,100) <= 10) then
+            local name = e.self:GetName()
+            local affix = affixes[math.random(#affixes)]
+
+            if name:find("^a_") then
+                e.self:TempName(affix .. name:sub(3))
+            elseif name:find("^an_") then
+                e.self:TempName(affix .. name:sub(4))
+            end
+            
+            if affix == "a fierce " then -- Increase max_hit by 33%
+                e.self:ModifyNPCStat("max_hit", tostring(math.ceil(e.self:GetNPCStat("max_hit") * 1.33))) -- Make sure second param is rounded or else it zeroes it out if it's a float
+            elseif affix == "an armored " then -- Double AC
+                e.self:ModifyNPCStat("ac", tostring(math.ceil(e.self:GetNPCStat("ac") * 2)))
+            elseif affix == "an unyielding " then -- Increase health by 25%
+                e.self:ModifyNPCStat("max_hp", tostring(math.ceil(e.self:GetNPCStat("max_hp") * 1.25)))
+                e.self:Heal()
+            end
+        end
+    end
+
+    -- make it if mob is not rarespawn and has no lastname, then chance for lastname to be like (treasure hoarder) and add a lootdrop to it based on level
+    -- e.self:AddLootTable(id)
+    -- e.self:GetLootList()
+
+
     -- peq_halloween
     if (eq.is_content_flag_enabled("peq_halloween")) then
         -- exclude mounts and pets
