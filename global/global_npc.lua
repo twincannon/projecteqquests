@@ -1,12 +1,11 @@
+affixes = {
+    "a fierce ",
+    "an armored ",
+    "an unyielding "
+}
+
 ---@param e NPCEventSpawn
 function event_spawn(e)
-
-    local affixes = {
-        "a fierce ",
-        "an armored ",
-        "an unyielding "
-    }
-
     if not e.self:IsRareSpawn() then
         local name = e.self:GetName()
         if name:find("^a_") or name:find("^an_") then
@@ -66,3 +65,34 @@ function event_spawn(e)
         end
     end
 end
+
+---@param e NPCEventDeath
+function event_death(e)
+    local group = e.other:CastToClient():GetGroup()
+    if (group ~= nil and group:GroupCount() > 0) then -- By default players report having a valid group of groupcount 0
+        -- Group kill
+        for i = 0, group:GroupCount() - 1 do
+            local member = group:GetMember(i)
+            if (member.valid and member:IsClient()) then
+                local client = member:CastToClient()
+                for i=1,#affixes do
+                    local name = e.self:GetName()
+                    if name:find("^" .. affixes[i]) then
+                        client:SetBucket("boost_next_exp", "1")
+                    end
+                end
+            end
+        end
+    elseif e.other:IsClient() then
+        -- Solo kill
+        for i=1,#affixes do
+            local name = e.self:GetName()
+            if name:find("^" .. affixes[i]) then
+                e.other:SetBucket("boost_next_exp", "1")
+            end
+        end
+    end
+
+    return 0
+end
+
