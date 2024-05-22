@@ -4,10 +4,39 @@ affixes = {
     "an unyielding "
 }
 
+function event_timer(e)
+	if e.timer == "change_last_name_treasure" then
+		e.self:ChangeLastName("treasure hoarder")
+	end
+end
+
 ---@param e NPCEventSpawn
 function event_spawn(e)
     if not e.self:IsRareSpawn() then
         local name = e.self:GetName()
+        -- Check if we should add a suffix/lastname
+        if e.self:GetLastName() == "" then
+            if (math.random(1,100) <= 5) then
+                if name:find("^a_") or name:find("^an_") then
+                    eq.set_timer("change_last_name_treasure",1)
+                    if e.self:GetLevel() < 11 then
+                        e.self:AddLootTable(200007) -- This is the Loottable id from PEQ editor
+                    elseif e.self:GetLevel() < 21 then
+                        e.self:AddLootTable(200008)
+                    elseif e.self:GetLevel() < 31 then
+                        e.self:AddLootTable(200009)
+                    elseif e.self:GetLevel() < 41 then
+                        e.self:AddLootTable(200010)
+                    elseif e.self:GetLevel() < 51 then
+                        e.self:AddLootTable(200011)
+                    elseif e.self:GetLevel() >= 51 then
+                        e.self:AddLootTable(200012)
+                    end
+                end
+            end
+        end
+
+        -- Check if we should add an affix
         if name:find("^a_") or name:find("^an_") then
             if (math.random(1,100) <= 10) then
                 local affix = affixes[math.random(#affixes)]
@@ -17,7 +46,7 @@ function event_spawn(e)
                 elseif name:find("^an_") then
                     e.self:TempName(affix .. name:sub(4))
                 end
-                
+
                 if affix == "a fierce " then -- Increase max_hit by 33%
                     e.self:ModifyNPCStat("max_hit", tostring(math.ceil(e.self:GetNPCStat("max_hit") * 1.33))) -- Make sure second param is rounded or else it zeroes it out if it's a float
                 elseif affix == "an armored " then -- Double AC
@@ -29,10 +58,6 @@ function event_spawn(e)
             end
         end
     end
-
-    -- make it if mob is not rarespawn and has no lastname, then chance for lastname to be like (treasure hoarder) and add a lootdrop to it based on level
-    -- e.self:AddLootTable(id)
-    -- e.self:GetLootList()
 
 
     -- peq_halloween
@@ -69,7 +94,7 @@ end
 ---@param e NPCEventDeath
 function event_death(e)
     local group = e.other:CastToClient():GetGroup()
-    if (group ~= nil and group:GroupCount() > 0) then -- By default players report having a valid group of groupcount 0
+    if (group ~= nil and group:GroupCount() > 0) then -- Solo players report having a valid group of groupcount 0
         -- Group kill
         for i = 0, group:GroupCount() - 1 do
             local member = group:GetMember(i)
