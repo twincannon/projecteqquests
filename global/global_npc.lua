@@ -12,6 +12,11 @@ end
 
 ---@param e NPCEventSpawn
 function event_spawn(e)
+    -- local lootentries = e.self:GetLootList()
+    -- for entry in lootentries.entries do
+    --     eq.debug(string.format("lootdrop entry %s",entry))
+    -- end
+
     if not e.self:IsRareSpawn() then
         local name = e.self:GetName()
         -- Check if we should add a suffix/lastname

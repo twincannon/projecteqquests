@@ -111,7 +111,7 @@ function event_combine(e)
 
 	for recipe_idx=1,#recipes do
 		local cur_recipe = recipes[recipe_idx]
-		local item_ids_to_remove = {}
+		local slot_ids_to_remove = {}
 		local recipe_failed = false
 		for bagslot_idx=0,container:BagSlots()-1 do
 			local inviteminst = inv:GetItem(e.container_slot, bagslot_idx)
@@ -124,7 +124,10 @@ function event_combine(e)
 					local is_number = type(tonumber(cur_recipe[i])) == "number"
 
 					if is_string or (is_number and tonumber(cur_recipe[i]) == invitem:ID()) then
-						table.insert(item_ids_to_remove, invitem:ID())
+
+						table.insert(slot_ids_to_remove, inv:CalcSlotId(e.container_slot, bagslot_idx))
+						--inv:GetSlotByItemInst(inviteminst) --not working
+
 						table.remove(cur_recipe, i) -- apparently really slow method
 						found_item = true
 						break
@@ -144,11 +147,10 @@ function event_combine(e)
 			if (type(tonumber(outcome_item_id)) == "number") then
 				e.self:SummonItem(tonumber(outcome_item_id));
 				-- TODO: Get item on cursor to verify it got summoned (i.e. don't eat items if it's a lore duplicate)
-				
-				-- Remove items from the players inventory
-				for item_remove_idx=1,#item_ids_to_remove do
-					e.self:RemoveItem(item_ids_to_remove[item_remove_idx], 1)
-					-- TODO: This should remove the specific stack in the container, not the first item found!
+
+				for slot_remove_idx=1,#slot_ids_to_remove do
+					--inv:DeleteItem(slot_ids_to_remove[slot_remove_idx], 1) --doesn't update client
+					e.self:DeleteItemInInventory(slot_ids_to_remove[slot_remove_idx], 1, true);
 				end
 
 				e.self:Message(MT.Emote,"You manage to fashion the items together.");
